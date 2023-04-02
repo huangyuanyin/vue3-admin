@@ -6,7 +6,6 @@
     </div>
     <div class="right-menu">
       <div class="avatar-wrapper">{{ userInfo && userInfo.name }}</div>
-      <!-- <div class="logout" @click="logout">退出</div> -->
       <img src="@/assets/images/icons/btn_close@2x.png" class="outLogin" alt="退出" @click="logout" />
     </div>
   </div>
@@ -29,6 +28,8 @@ const goBack = () => {
 
 const logout = () => {
   router.push('/login')
+  localStorage.removeItem('token')
+  localStorage.removeItem('userInfo')
 }
 
 watch(
@@ -41,14 +42,25 @@ watch(
         headTitle.value = '账号管理'
         break
       case '/changeMember':
-        headTitle.value = '添加账号'
+        if (route.query.type === 'add') {
+          headTitle.value = '添加账号'
+        } else {
+          headTitle.value = '修改账号'
+        }
         break
       case '/backend':
         headTitle.value = '部门管理'
         break
-      // case '/backend/category':
-      //   goBackFlag.value = true
-      //   break
+      case '/jump':
+        headTitle.value = '跳转管理'
+        break
+      case '/addJump':
+        if (route.query.id) {
+          headTitle.value = '修改跳转'
+        } else {
+          headTitle.value = '添加跳转'
+        }
+        break
       // case '/backend/food':
       //   goBackFlag.value = true
       //   break
@@ -65,10 +77,25 @@ onMounted(() => {
       headTitle.value = '账号管理'
       break
     case '/changeMember':
-      headTitle.value = '添加账号'
+      console.log(`output->route.query.type`, route.query.type)
+      if (route.query.type === 'add') {
+        headTitle.value = '添加账号'
+      } else {
+        headTitle.value = '修改账号'
+      }
       break
     case '/backend':
       headTitle.value = '部门管理'
+      break
+    case '/jump':
+      headTitle.value = '跳转管理'
+      break
+    case '/addJump':
+      if (route.query.id) {
+        headTitle.value = '修改跳转'
+      } else {
+        headTitle.value = '添加跳转'
+      }
       break
     // case '/backend/category':
     //   goBackFlag.value = true

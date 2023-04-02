@@ -22,3 +22,122 @@ export function getMemberListApi(params) {
     params
   })
 }
+
+// 新增---添加员工
+export function addEmployee(params) {
+  return request({
+    url: '/employee',
+    method: 'post',
+    data: params
+  })
+}
+
+export function dishPage(params) {
+  return request({
+    url: '/dish/page',
+    method: 'get',
+    params
+  })
+}
+
+export const dishStatusByStatus = (params) => {
+  return request({
+    url: `/dish/status/${params.status}`,
+    method: 'post',
+    params: { ids: params.id }
+  })
+}
+
+export const getCategoryPage = (params) => {
+  return request({
+    url: '/category/page',
+    method: 'get',
+    params
+  })
+}
+
+export const addCategoryApi = (params) => {
+  return request({
+    url: '/category',
+    method: 'post',
+    data: params
+  })
+}
+
+// 修改---启用禁用接口
+export function enableOrDisableEmployee(params) {
+  return request({
+    url: '/employee',
+    method: 'put',
+    data: params
+  })
+}
+
+// 跳转管理 -  删除接口
+export const deleteDish = (ids) => {
+  return request({
+    url: '/dish',
+    method: 'delete',
+    params: { ids }
+  })
+}
+
+export const getCategoryListApi = (params) => {
+  return request({
+    url: '/category/list',
+    method: 'get',
+    params
+  })
+}
+
+// 跳转管理 - 修改接口
+export const editDish = (params) => {
+  return request({
+    url: '/dish',
+    method: 'put',
+    data: { ...params }
+  })
+}
+
+// 跳转管理 - 新增接口
+export const addDish = (params) => {
+  return request({
+    url: '/dish',
+    method: 'post',
+    data: { ...params }
+  })
+}
+
+// 跳转管理 - 查询详情
+export const queryDishById = (id) => {
+  return request({
+    url: `/dish/${id}`,
+    method: 'get'
+  })
+}
+
+// 账号管理 - 查详情接口
+export function queryEmployeeByIdApi(id) {
+  return request({
+    url: `/employee/${id}`,
+    method: 'get'
+  })
+}
+
+// 部门管理 - 删除当前列的接口
+export const deleCategory = (ids) => {
+  return request({
+    url: '/category',
+    method: 'delete',
+    params: { ids }
+  })
+}
+
+// 部门管理 - 修改接口
+export const editCategory = (params) => {
+  return request({
+    url: '/category',
+    method: 'put',
+    data: { ...params }
+  })
+}

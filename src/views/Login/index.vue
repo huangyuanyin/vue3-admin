@@ -29,7 +29,9 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
     if (valid) {
       let res = await loginApi(loginForm)
       if (res.code === 1) {
-        router.push('/')
+        router.push('/member')
+        localStorage.setItem('token', '111')
+        localStorage.setItem('userInfo', JSON.stringify(res.data))
       } else {
         ElMessage.error(res.msg)
       }

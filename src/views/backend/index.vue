@@ -8,18 +8,18 @@
       <el-table :data="tableData" stripe class="tableBox" border>
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="type" label="类型">
-          <template slot-scope="scope">
+          <template #default="scope">
             <span>{{ scope.row.type == '1' ? '分公司' : '项目组' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="updateTime" label="操作时间">
-          <template slot-scope="scope">
+          <template #default="scope">
             {{ scope.row.updateTime }}
           </template>
         </el-table-column>
         <el-table-column prop="affiliatedCompany" label="所属公司"></el-table-column>
         <el-table-column label="操作" width="160" align="center">
-          <template slot-scope="scope">
+          <template #default="scope">
             <el-button type="text" size="small" class="blueBug" @click="editHandle(scope.row)"> 修改 </el-button>
             <el-button type="text" size="small" class="delBut non" @click="deleteHandle(scope.row.id)"> 删除 </el-button>
           </template>
@@ -31,27 +31,28 @@
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="counts"
+        :current-page="page"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
     <el-dialog :title="title" v-model="dialogVisible" width="35%" :before-close="handleClose">
       <el-form label-width="100px" :model="userForm" ref="userRuleFormRef" :rules="userRules">
-        <el-form-item label="名称：">
+        <el-form-item label="名称：" prop="name">
           <el-input v-model="userForm.name" placeholder="请输入名称" size="large" maxlength="14" />
         </el-form-item>
-        <el-form-item label="排序：">
+        <el-form-item label="排序：" prop="sort">
           <el-input v-model="userForm.sort" type="number" size="large" placeholder="请输入排序" />
         </el-form-item>
-        <el-form-item label="所属公司：">
+        <el-form-item label="所属公司：" prop="affiliatedCompany">
           <el-input size="large" v-model="userForm.affiliatedCompany" placeholder="请输入公司名称" maxlength="14" />
         </el-form-item>
       </el-form>
       <el-form-item>
         <div class="button-wrap" style="display: flex">
           <el-button size="large" @click="resertForm(userRuleFormRef)">取 消</el-button>
-          <el-button type="primary" size="large" @click="submitForm(userRuleFormRef)">确 定</el-button>
-          <el-button v-if="action != 'edit'" type="primary" size="large" class="continue" @click="submitForm('go')"> 保存并继续添加 </el-button>
+          <el-button type="primary" size="large" @click="submitForm(userRuleFormRef, null)">确 定</el-button>
+          <el-button v-if="action != 'edit'" type="primary" size="large" class="continue" @click="submitForm(userRuleFormRef, 'go')"> 保存并继续添加 </el-button>
         </div>
       </el-form-item>
     </el-dialog>
@@ -60,19 +61,19 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { logoutApi } from '@/api/user'
-import { ElMessage, FormInstance, FormRules } from 'element-plus'
+import { useRouter, useRoute } from 'vue-router'
+import { editCategory, getCategoryPage, addCategoryApi, deleCategory } from '@/api/user'
+import { ElMessage, FormInstance, FormRules, ElMessageBox } from 'element-plus'
 
+const route = useRoute()
 const router = useRouter()
 const headTitle = ref('账号管理')
-const goBackFlag = ref(false)
-const defAct = '2'
+const action = ref('')
 const userInfo = ref(window.localStorage.getItem('userInfo') || {})
 const menuActived = ref(false)
 const loading = ref(false)
-const iframeUrl = ref('')
 const tableData = ref([])
+const page = ref(1)
 const pageSize = ref(10)
 const counts = ref(0)
 const dialogVisible = ref(false)
@@ -80,7 +81,8 @@ const title = ref('新增子公司')
 let userForm = reactive({
   name: '',
   sort: '',
-  affiliatedCompany: ''
+  affiliatedCompany: '',
+  type: ''
 })
 const userRuleFormRef = ref<FormInstance>()
 const userRules = reactive<FormRules>({
@@ -88,34 +90,34 @@ const userRules = reactive<FormRules>({
   sort: [{ required: true, message: '请输入排序', trigger: 'blur' }],
   affiliatedCompany: [{ required: true, message: '请输入所属公司', trigger: 'blur' }]
 })
-const menuList = ref([
-  {
-    id: '2',
-    name: '账号管理',
-    url: 'page/member/list.html',
-    icon: 'icon-member'
-  },
-  {
-    id: '3',
-    name: '部门管理',
-    url: 'page/category/list.html',
-    icon: 'icon-category'
-  },
-  {
-    id: '4',
-    name: '跳转管理',
-    url: 'page/food/list.html',
-    icon: 'icon-food'
-  }
-])
 
-const menuHandle = (item: any, goBackFlag: any) => {
-  // loading.value = true
-  menuActived.value = item.id
-  // iframeUrl = item.url
-  headTitle.value = item.name
-  goBackFlag.value = goBackFlag
-  // closeLoading()
+const editHandle = (dat: { name: any; sort: any; id: any; affiliatedCompany: any }) => {
+  title.value = '修改信息'
+  action.value = 'edit'
+  dialogVisible.value = true
+  userForm.name = dat.name
+  userForm.sort = dat.sort
+  userForm.type = String(dat.type)
+  userForm.affiliatedCompany = dat.affiliatedCompany
+  userForm.id = dat.id
+  console.log(`output->dat`, dat.type)
+}
+
+const deleteHandle = (ids: any) => {
+  ElMessageBox.confirm('此操作将永久删除该部门, 是否继续?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    let res = await deleCategory(ids)
+    if (res.code === 1) {
+      ElMessage.success('删除成功！')
+      page.value = 1
+      init()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
+    }
+  })
 }
 
 const handleClose = (done: () => void) => {
@@ -126,24 +128,54 @@ const handleClose = (done: () => void) => {
 
 const resertForm = (formEl: FormInstance | undefined) => {
   dialogVisible.value = false
-  dialogVisible.value = false
   formEl.resetFields()
 }
 
-const submitForm = async (formEl: FormInstance | undefined) => {
+const submitForm = async (formEl: FormInstance | undefined, type: any) => {
   if (!formEl) return
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
-      if (title.value === '新增子公司') {
-        addUser(userForm)
+      if (action.value == 'add') {
+        if (title.value === '新增子公司') {
+          userForm.type = '1'
+          addCategory(userForm, type)
+        } else {
+          userForm.type = '2'
+          addCategory(userForm, type)
+        }
       } else {
-        updateUser(userForm)
+        let res = await editCategory(userForm)
+        if (res.code === 1) {
+          ElMessage.success('修改成功')
+          resertForm(userRuleFormRef.value)
+          dialogVisible.value = false
+          init()
+        } else {
+          ElMessage.error(res.msg)
+        }
       }
     }
   })
 }
 
+const addCategory = async (data: any, type: any) => {
+  let res = await addCategoryApi(data)
+  if (res.code === 1) {
+    ElMessage.success('新增成功')
+    resertForm(userRuleFormRef.value)
+    init()
+    if (type === 'go') {
+      dialogVisible.value = true
+    } else {
+      dialogVisible.value = false
+    }
+  } else {
+    ElMessage.error(res.msg)
+  }
+}
+
 const addClass = (type: any) => {
+  action.value = 'add'
   dialogVisible.value = true
   if (type == 'class') {
     title.value = '新增子公司'
@@ -152,20 +184,28 @@ const addClass = (type: any) => {
   }
 }
 
-const logout = async () => {
-  let res = await logoutApi()
-  if (res.code === 1) {
-    localStorage.removeItem('userInfo')
-    router.push('/login')
+const handleSizeChange = (val: number) => {
+  pageSize.value = val
+  init()
+}
+const handleCurrentChange = (val: number) => {
+  page.value = val
+  init()
+}
+
+const init = async () => {
+  let res = await getCategoryPage({ page: page.value, pageSize: pageSize.value })
+  if (String(res.code) === '1') {
+    tableData.value = res.data.records
+    counts.value = Number(res.data.total)
+  } else {
+    ElMessage.error(res.msg || '操作失败')
   }
 }
 
-const goBack = () => {
-  const menu = menuList.value.find((item) => item.id === menuActived.value)
-  menuHandle(menu, false)
-}
-
-onMounted(() => {})
+onMounted(() => {
+  init()
+})
 </script>
 
 <style scoped>
@@ -184,6 +224,10 @@ onMounted(() => {})
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+
+:deep(.el-pagination__editor) {
+  width: 100px !important;
 }
 
 :deep(.el-dialog__header) {

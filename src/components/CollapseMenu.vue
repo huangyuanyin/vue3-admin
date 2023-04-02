@@ -28,11 +28,12 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref, watchEffect } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
-const defAct = ref('2')
+const defAct = ref('')
 const router = useRouter()
+const route = useRoute()
 const menuList = ref([
   {
     id: '2',
@@ -55,6 +56,27 @@ const menuList = ref([
   }
 ])
 
+watchEffect(() => {
+  switch (route.path) {
+    case '/member':
+      defAct.value = '2'
+      break
+    case '/changeMember':
+      defAct.value = '2'
+      break
+    case '/backend':
+      defAct.value = '3'
+      break
+    case '/jump':
+      defAct.value = '4'
+    case '/addJump':
+      defAct.value = '4'
+      break
+    default:
+      break
+  }
+})
+
 const menuHandle = (item: any, goBackFlag: any) => {
   defAct.value = item.id
   // loading.value = true
@@ -66,7 +88,26 @@ const menuHandle = (item: any, goBackFlag: any) => {
 }
 
 onMounted(() => {
-  // defAct.value = item.id
+  console.log(`output->route`, route.path)
+  switch (route.path) {
+    case '/member':
+      defAct.value = '2'
+      break
+    case '/changeMember':
+      defAct.value = '2'
+      break
+    case '/backend':
+      defAct.value = '3'
+      break
+    case '/jump':
+      defAct.value = '4'
+      break
+    case '/addJump':
+      defAct.value = '4'
+      break
+    default:
+      break
+  }
 })
 </script>
 

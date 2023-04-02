@@ -28,6 +28,11 @@ const routes = [
     path: '/jump',
     name: 'Jump',
     component: () => import('@/views/jump/index.vue')
+  },
+  {
+    path: '/addJump',
+    name: 'AddJump',
+    component: () => import('@/views/jump/addJump.vue')
   }
   // {
   //   path: '/:pathMatch(.*)*',
@@ -40,7 +45,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory('/dist'),
+  history: createWebHashHistory('/'),
   routes
 })
 
