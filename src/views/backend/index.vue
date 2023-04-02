@@ -100,7 +100,6 @@ const editHandle = (dat: { name: any; sort: any; id: any; affiliatedCompany: any
   userForm.type = String(dat.type)
   userForm.affiliatedCompany = dat.affiliatedCompany
   userForm.id = dat.id
-  console.log(`output->dat`, dat.type)
 }
 
 const deleteHandle = (ids: any) => {
@@ -136,6 +135,7 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       if (action.value == 'add') {
+        delete userForm.id
         if (title.value === '新增子公司') {
           userForm.type = '1'
           addCategory(userForm, type)

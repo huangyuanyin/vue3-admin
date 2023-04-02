@@ -202,6 +202,9 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      if (dishFlavors.value.length == 0) {
+        return ElMessage.error('请添加权限配置')
+      }
       let params = { ...ruleForm }
       params.status = ruleForm ? 1 : 0
       params.categoryId = ruleForm.categoryId
@@ -265,7 +268,7 @@ const init = async () => {
     ruleForm.status = res.data.status == '1'
     dishFlavors.value =
       res.data.flavors &&
-      res.data.flavors.map((obj) => ({
+      res.data.flavors.map((obj: { value: any }) => ({
         ...obj,
         value: obj.value,
         showOption: false
@@ -323,7 +326,7 @@ onMounted(() => {
 }
 .items {
   display: flex;
-  margin-bottom: 20px;
+  margin: 10px 0;
   align-items: center;
 }
 .delFlavor {
@@ -359,6 +362,8 @@ onMounted(() => {
   background: #fff;
   top: 50px;
   z-index: 99;
+  height: 400px;
+  overflow-y: scroll;
 }
 
 .selectInput .flavorSelect .items {
