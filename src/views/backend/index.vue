@@ -1,11 +1,69 @@
 <template>
   <div class="dashboard-container" id="member-app">
     <div class="container">
-      <div class="tableBar" style="display: inline-block">
+      <div class="tableBar" style="display: flex; justify-content: space-between; padding-right: 35px" v-if="!showDetail">
         <el-button type="primary" size="large" class="continue" @click="addClass('class')"> + 新增子公司 </el-button>
-        <el-button type="primary" size="large" @click="addClass('meal')"> + 新增项目部 </el-button>
+        <!-- <el-input
+          v-model="queryName"
+          class="w-50 m-2"
+          size="large"
+          placeholder="请输入所属公司名称进行查找..."
+          :suffix-icon="Search"
+          clearable
+          @blur="handleQuery"
+          @clear="handleQuery"
+        /> -->
       </div>
-      <el-table :data="tableData" stripe class="tableBox" border>
+      <el-table :data="tableData" stripe class="tableBox" border v-if="!showDetail">
+        <el-table-column prop="name" label="名称"></el-table-column>
+        <el-table-column prop="type" label="类型">
+          <template #default="scope">
+            <span>{{ scope.row.type == '1' ? '分公司' : '项目组' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="updateTime" label="操作时间">
+          <template #default="scope">
+            {{ scope.row.updateTime }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="affiliatedCompany" label="所属公司"></el-table-column>
+        <el-table-column label="操作" width="160" align="center">
+          <template #default="scope">
+            <el-button type="text" size="small" class="blueBug" @click="editHandle(scope.row)"> 修改 </el-button>
+            <el-button type="text" size="small" class="warnBug" @click="handleDetail(scope.row)"> 详情 </el-button>
+            <el-button type="text" size="small" class="delBut non" @click="deleteHandle(scope.row.id)"> 删除 </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        v-if="!showDetail"
+        class="pageList"
+        :page-sizes="[10, 20, 30, 40]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="counts"
+        :current-page="page"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
+      <div class="titleWrap" v-if="showDetail">
+        <el-button type="text" class="blueBug" size="large" @click="goback()"> 返回 </el-button>
+        <p style="margin-left: 30px">当前子公司：{{ 11 }}</p>
+      </div>
+      <div class="tableBar" style="display: flex; justify-content: space-between; padding-right: 35px" v-if="showDetail">
+        <el-button type="primary" size="large" @click="addClass('meal')"> + 新增项目部 </el-button>
+        <!-- <el-input
+          v-model="queryName"
+          class="w-50 m-2"
+          size="large"
+          placeholder="请输入所属公司名称进行查找..."
+          :suffix-icon="Search"
+          clearable
+          @blur="handleQuery"
+          @clear="handleQuery"
+        /> -->
+      </div>
+      <el-table :data="tableData" stripe class="tableBox" border v-if="showDetail">
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="type" label="类型">
           <template #default="scope">
@@ -26,6 +84,7 @@
         </el-table-column>
       </el-table>
       <el-pagination
+        v-if="showDetail"
         class="pageList"
         :page-sizes="[10, 20, 30, 40]"
         :page-size="pageSize"
@@ -64,9 +123,14 @@ import { onMounted, ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { editCategory, getCategoryPage, addCategoryApi, deleCategory } from '@/api/user'
 import { ElMessage, FormInstance, FormRules, ElMessageBox } from 'element-plus'
+import type { TabsPaneContext } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
+const queryName = ref('总公司')
+const showDetail = ref(false)
+const activeName = ref('1')
 const headTitle = ref('账号管理')
 const action = ref('')
 const userInfo = ref(window.localStorage.getItem('userInfo') || {})
@@ -100,6 +164,24 @@ const editHandle = (dat: { name: any; sort: any; id: any; affiliatedCompany: any
   userForm.type = String(dat.type)
   userForm.affiliatedCompany = dat.affiliatedCompany
   userForm.id = dat.id
+}
+
+const goback = () => {
+  showDetail.value = false
+  activeName.value = '1'
+}
+
+const handleDetail = (id: any) => {
+  queryName.value = id.name
+  activeName.value = '2'
+  showDetail.value = true
+}
+
+const handleClick = (tab: TabsPaneContext, event: Event) => {
+  // activeName.value = tab.paneName
+  page.value = 1
+  queryName.value = ''
+  init()
 }
 
 const deleteHandle = (ids: any) => {
@@ -193,8 +275,13 @@ const handleCurrentChange = (val: number) => {
   init()
 }
 
+const handleQuery = () => {
+  page.value = 1
+  init()
+}
+
 const init = async () => {
-  let res = await getCategoryPage({ page: page.value, pageSize: pageSize.value })
+  let res = await getCategoryPage({ page: page.value, pageSize: pageSize.value, type: activeName.value, name: queryName.value })
   if (String(res.code) === '1') {
     tableData.value = res.data.records
     counts.value = Number(res.data.total)
@@ -220,10 +307,22 @@ onMounted(() => {
 .tableBar {
   margin-bottom: 20px;
 }
+
+.titleWrap {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
 .pageList {
   display: flex;
   justify-content: center;
   margin-top: 20px;
+}
+:deep(.el-tabs) {
+  box-shadow: none;
+}
+:deep(.el-tabs__content) {
+  padding-top: 30px;
 }
 
 :deep(.el-pagination__editor) {

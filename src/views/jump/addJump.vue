@@ -134,7 +134,6 @@ const selectFlavor = (st: any, index: string | number) => {
   const obj = JSON.parse(JSON.stringify(dishFlavors.value[index]))
   obj.showOption = st
   dishFlavors.value.splice(index, 1, obj)
-  console.log(`output->dis`, dishFlavors.value)
   // this.dishFlavors[index].showOption = st
 }
 
@@ -143,7 +142,7 @@ const handleAvatarSuccess = (response: { code: number; msg: string; data: any },
   if (response.code === 0 && response.msg === '未登录') {
     window.top.location.href = '/backend/page/login/login.html'
   } else {
-    imageUrl.value = `/common/download?name=${response.data}`
+    imageUrl.value = `http://101.43.127.118:8080/common/download?name=${response.data}`
     ruleForm.image = response.data
     console.log(`output->ruleForm.image`, ruleForm.image)
   }
@@ -209,9 +208,11 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
       params.status = ruleForm ? 1 : 0
       params.categoryId = ruleForm.categoryId
       params.flavors = dishFlavors.value.map((obj) => ({
-        ...obj,
-        value: JSON.stringify(obj.value)
+        // ...obj,
+        // value: JSON.stringify(obj.value)
+        name: obj.name
       }))
+      console.log(`output->dis`, params.flavors)
       delete params.dishFlavors
       if (actionType.value == 'add') {
         delete params.id
@@ -221,6 +222,7 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
           if (!type) {
             goBack(ruleFormRef.value)
           } else {
+            ruleFormRef.value.resetFields()
             dishFlavors.value = []
             // this.dishFlavorsData = []
             imageUrl.value = ''
@@ -238,6 +240,7 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
           ElMessage.error(res.msg || '操作失败')
         }
       } else {
+        params.id = route.query.id
         delete params.updateTime
         let res = await editDish(params)
         if (res.code === 1) {
@@ -276,7 +279,7 @@ const init = async () => {
     console.log('this.dishFlavors', dishFlavors.value)
     // this.ruleForm.id = res.data.data.categoryId
     // this.imageUrl = res.data.data.image
-    imageUrl.value = `/common/download?name=${res.data.image}`
+    imageUrl.value = `http://101.43.127.118:8080/common/download?name=${res.data.image}`
   } else {
     ElMessage.error(res.msg || '操作失败')
   }
@@ -299,6 +302,10 @@ onMounted(() => {
   background-color: #fff;
   padding: 30px 28px;
   border-radius: 4px;
+}
+.upload-demo {
+  min-width: 200px;
+  /* min-height: 200px */
 }
 
 :deep(.el-input, .el-input__wrapper) {

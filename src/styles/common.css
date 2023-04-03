@@ -43,6 +43,18 @@ a:hover {
   width: 0px;
   border-right: solid 1px #ebeef5 !important;
 }
+.warnBug {
+  color: #ffb302 !important;
+  position: relative;
+}
+.warnBug::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  height: 14px;
+  width: 0px;
+  border-right: solid 1px #ebeef5 !important;
+}
 .delBut {
   color: #f56c6c !important;
   position: relative;

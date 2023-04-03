@@ -20,7 +20,7 @@
           <el-button type="warning" size="large" @click="addFoodtype('add')"> + 新建链接网站 </el-button>
         </div>
       </div>
-      <el-table :data="tableData" stripe class="tableBox" @selection-change="handleSelectionChange" border>
+      <el-table :data="tableData" class="tableBox" @selection-change="handleSelectionChange" border>
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column prop="name" label="网站名称"></el-table-column>
         <el-table-column label="访问链接" width="200" show-overflow-tooltip>
@@ -35,7 +35,19 @@
                 <img src="@/assets/images/noImg.png" style="width: auto; height: 40px; border: none" />
               </div>
             </el-image> -->
-            <el-image style="width: auto; height: 40px; border: none; cursor: pointer" :src="getImage(scope.row.image)" fit="contain" />
+            <el-image
+              style="width: auto; height: 40px; border: none; cursor: pointer"
+              :src="getImage(scope.row.image)"
+              :preview-src-list="[`http://101.43.127.118:8080/common/download?name=${scope.row.image}`]"
+              fit="contain"
+              preview-teleported
+            >
+              <template #error>
+                <div class="image-slot">
+                  <el-icon><icon-picture /></el-icon>
+                </div>
+              </template>
+            </el-image>
           </template>
         </el-table-column>
         <el-table-column label="状态">
@@ -48,7 +60,7 @@
           <template #default="scope">
             <el-button type="text" size="small" class="blueBug" @click="addFoodtype(scope.row.id)"> 修改 </el-button>
             <el-button text type="warning" size="small" class="blueBug" @click="statusHandle(scope.row)"> {{ scope.row.status == '0' ? '启用' : '停用' }} </el-button>
-            <el-button text type="danger" size="small" class="delBut non" @click="deleteHandle('单删', scope.row.id)"> 删除 </el-button>
+            <el-button v-if="scope.row.status == '0'" text type="danger" size="small" class="delBut non" @click="deleteHandle('单删', scope.row.id)"> 删除 </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -67,9 +79,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, nextTick, computed } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { dishPage, dishStatusByStatus, deleteDish } from '@/api/user'
+import { Picture as IconPicture } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 
@@ -91,13 +104,14 @@ const tableData = ref([])
 const checkList = ref([])
 
 const handleSelectionChange = (val: User[]) => {
+  checkList.value = []
   val.forEach((n) => {
     checkList.value.push(n.id)
   })
 }
 
 const getImage = (image: any) => {
-  return `/common/download?name=${image}`
+  return `http://101.43.127.118:8080/common/download?name=${image}`
 }
 
 const handleQuery = () => {
@@ -144,20 +158,16 @@ const statusHandle = (row: any) => {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
+  }).then(async () => {
+    let res = await dishStatusByStatus(params)
+    if (res.code == 1) {
+      ElMessage.success(res.data || '网站状态已经更改成功！')
+      page.value = 1
+      dishPageList()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
+    }
   })
-    .then(async () => {
-      let res = await dishStatusByStatus(params)
-      if (res.code == 1) {
-        ElMessage.success(res.data || '网站状态已经更改成功！')
-        page.value = 1
-        dishPageList()
-      } else {
-        ElMessage.error(res.msg || '操作失败')
-      }
-    })
-    .catch((err) => {
-      ElMessage.error('请求出错了：' + err)
-    })
 }
 
 // 删除

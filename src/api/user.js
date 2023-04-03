@@ -32,6 +32,24 @@ export function addEmployee(params) {
   })
 }
 
+// 修改---修改员工
+export function editEmployee(params) {
+  return request({
+    url: '/employee',
+    method: 'put',
+    data: params
+  })
+}
+
+// 删除员工
+export function deleteEmployee(ids) {
+  return request({
+    url: '/employee',
+    method: 'delete',
+    params: { ids }
+  })
+}
+
 export function dishPage(params) {
   return request({
     url: '/dish/page',

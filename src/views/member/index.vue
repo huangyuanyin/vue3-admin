@@ -2,13 +2,20 @@
   <div>
     <div class="container">
       <div class="tableBar">
-        <el-input v-model="input" placeholder="请输入员工姓名" size="large" style="width: 250px" clearable @keyup.enter.native="handleQuery" :suffix-icon="Search"> </el-input>
-        <el-button type="primary" size="large" @click="addMemberHandle('add')"> + 添加员工 </el-button>
+        <el-input v-model="input" placeholder="请输入账号姓名" size="large" style="width: 250px" clearable @keyup.enter.native="handleQuery" :suffix-icon="Search"> </el-input>
+        <el-button type="primary" size="large" @click="addMemberHandle('add')"> + 添加账号 </el-button>
       </div>
       <el-table :data="tableData" stripe class="tableBox" border v-loading="loading">
-        <el-table-column prop="name" label="员工姓名"></el-table-column>
+        <el-table-column prop="name" label="账号姓名"></el-table-column>
         <el-table-column prop="username" label="账号"></el-table-column>
         <el-table-column prop="phone" label="手机号"></el-table-column>
+        <el-table-column prop="companyName" label="公司名称"></el-table-column>
+        <el-table-column prop="projectName" label="项目名称"></el-table-column>
+        <el-table-column prop="sex" label="权限">
+          <template #default="scope">
+            {{ String(scope.row.sex) === '1' ? '总公司' : '分公司' }}
+          </template>
+        </el-table-column>
         <el-table-column label="账号状态">
           <template #default="scope">
             {{ String(scope.row.status) === '0' ? '已禁用' : '正常' }}
@@ -16,10 +23,13 @@
         </el-table-column>
         <el-table-column label="操作" width="160" align="center">
           <template #default="scope">
-            <el-button type="text" size="large" class="blueBug" @click="addMemberHandle(scope.row.id)" :class="{ notAdmin: user !== 'admin' }"> 编辑 </el-button>
-            <el-button type="text" size="large" class="delBut non" @click="statusHandle(scope.row)" v-if="user === 'admin'">
+            <!-- <el-button type="text" size="large" class="delBut non" @click="statusHandle(scope.row)" v-if="user === 'admin'">
               {{ scope.row.status == '1' ? '禁用' : '启用' }}
-            </el-button>
+            </el-button> -->
+            <el-button v-if="scope.row.status == '1' && user === 'admin'" type="text" size="large" class="delBut non" @click="statusHandle(scope.row)">禁用</el-button>
+            <el-button v-else type="text" size="large" class="warnBug non" @click="statusHandle(scope.row)" v-if="user === 'admin'">启用</el-button>
+            <el-button type="text" size="large" class="blueBug non" @click="addMemberHandle(scope.row.id)" :class="{ notAdmin: user !== 'admin' }"> 编辑 </el-button>
+            <el-button type="text" size="large" class="delBut non" @click="handleDelete(scope.row.id)" :class="{ notAdmin: user !== 'admin' }"> 删除 </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -41,7 +51,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
-import { getMemberListApi, enableOrDisableEmployee } from '@/api/user'
+import { getMemberListApi, enableOrDisableEmployee, deleteEmployee } from '@/api/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
@@ -81,6 +91,25 @@ const statusHandle = (row: { id: any; status: any }) => {
       }
     } else {
       ElMessage.error(res.msg || '账号状态更改失败！')
+    }
+  })
+}
+
+const handleDelete = (id: any) => {
+  ElMessageBox.confirm('确认删除该账号?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    let res = await deleteEmployee(id)
+    if (res.code === 1) {
+      if (String(res.code) === '1') {
+        ElMessage.success('账号删除成功！')
+        page.value = 1
+        getMemberList()
+      }
+    } else {
+      ElMessage.error(res.msg || '账号删除失败！')
     }
   })
 }

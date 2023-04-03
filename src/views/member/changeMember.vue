@@ -8,7 +8,6 @@
         <el-form-item label="负责人姓名:" prop="name">
           <el-input size="large" v-model="ruleForm.name" placeholder="请输入负责人姓名" maxlength="20" />
         </el-form-item>
-
         <el-form-item label="负责人手机号:" prop="phone">
           <el-input size="large" v-model="ruleForm.phone" placeholder="请输入负责人手机号" maxlength="20" />
         </el-form-item>
@@ -40,11 +39,11 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { useRouter, useRoute, LocationQueryValue } from 'vue-router'
-import { addEmployee, queryEmployeeByIdApi } from '@/api/user'
+import { addEmployee, queryEmployeeByIdApi, editEmployee } from '@/api/user'
 
 const route = useRoute()
 const router = useRouter()
-const actionType = ref('add')
+const actionType = ref()
 let ruleForm = reactive({
   username: '',
   name: '',
@@ -92,8 +91,9 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
       let params = { ...ruleForm }
       params.sex === '总公司' ? (params.sex = '1') : (params.sex = '2')
       route.query.id ? (params.id = route.query.id) : ''
-      let res = await addEmployee(params)
+      let res = route.query.id ? await editEmployee(params) : await addEmployee(params)
       if (res.code === 1) {
+        ElMessage.success(res.data || '添加成功')
         resertForm(ruleFormRef.value)
         type ? '' : router.go(-1)
       } else {
@@ -123,6 +123,7 @@ onMounted(() => {
   if (route.query.id) {
     queryEmployeeById(route.query.id)
   }
+  actionType.value = route.query.id ? 'edit' : 'add'
 })
 </script>
 
