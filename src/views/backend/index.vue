@@ -29,7 +29,7 @@
         <el-table-column prop="affiliatedCompany" label="所属公司"></el-table-column>
         <el-table-column label="操作" width="160" align="center">
           <template #default="scope">
-            <el-button type="text" size="small" class="blueBug" @click="editHandle(scope.row)"> 修改 </el-button>
+            <el-button type="text" size="small" class="blueBug" @click="editHandle(scope.row, '1')"> 修改 </el-button>
             <el-button type="text" size="small" class="warnBug" @click="handleDetail(scope.row)"> 详情 </el-button>
             <el-button type="text" size="small" class="delBut non" @click="deleteHandle(scope.row.id)"> 删除 </el-button>
           </template>
@@ -78,7 +78,7 @@
         <el-table-column prop="affiliatedCompany" label="所属公司"></el-table-column>
         <el-table-column label="操作" width="160" align="center">
           <template #default="scope">
-            <el-button type="text" size="small" class="blueBug" @click="editHandle(scope.row)"> 修改 </el-button>
+            <el-button type="text" size="small" class="blueBug" @click="editHandle(scope.row, '2')"> 修改 </el-button>
             <el-button type="text" size="small" class="delBut non" @click="deleteHandle(scope.row.id)"> 删除 </el-button>
           </template>
         </el-table-column>
@@ -104,7 +104,7 @@
           <el-input v-model="userForm.sort" type="number" size="large" placeholder="请输入排序" />
         </el-form-item>
         <el-form-item label="所属公司：" prop="affiliatedCompany">
-          <el-input size="large" v-model="userForm.affiliatedCompany" placeholder="请输入公司名称" maxlength="14" />
+          <el-input size="large" v-model="userForm.affiliatedCompany" placeholder="请输入公司名称" maxlength="14" disabled />
         </el-form-item>
       </el-form>
       <el-form-item>
@@ -145,7 +145,7 @@ const title = ref('新增子公司')
 let userForm = reactive({
   name: '',
   sort: '',
-  affiliatedCompany: '',
+  affiliatedCompany: '总公司',
   type: ''
 })
 const userRuleFormRef = ref<FormInstance>()
@@ -155,26 +155,29 @@ const userRules = reactive<FormRules>({
   affiliatedCompany: [{ required: true, message: '请输入所属公司', trigger: 'blur' }]
 })
 
-const editHandle = (dat: { name: any; sort: any; id: any; affiliatedCompany: any }) => {
+const editHandle = (dat: { name: any; sort: any; id: any; affiliatedCompany: any }, type: string) => {
   title.value = '修改信息'
   action.value = 'edit'
   dialogVisible.value = true
   userForm.name = dat.name
   userForm.sort = dat.sort
-  userForm.type = String(dat.type)
-  userForm.affiliatedCompany = dat.affiliatedCompany
+  userForm.type = type
+  type == '1' ? (userForm.affiliatedCompany = '总公司') : (userForm.affiliatedCompany = dat.affiliatedCompany)
   userForm.id = dat.id
 }
 
 const goback = () => {
   showDetail.value = false
   activeName.value = '1'
+  queryName.value = '总公司'
+  init()
 }
 
 const handleDetail = (id: any) => {
   queryName.value = id.name
   activeName.value = '2'
   showDetail.value = true
+  init()
 }
 
 const handleClick = (tab: TabsPaneContext, event: Event) => {
@@ -260,8 +263,10 @@ const addClass = (type: any) => {
   action.value = 'add'
   dialogVisible.value = true
   if (type == 'class') {
+    userForm.affiliatedCompany = '总公司'
     title.value = '新增子公司'
   } else {
+    userForm.affiliatedCompany = queryName.value
     title.value = '新增项目部'
   }
 }
