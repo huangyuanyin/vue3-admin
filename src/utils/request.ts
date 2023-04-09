@@ -10,7 +10,8 @@ const service = axios.create({
 service.interceptors.request.use(
   function (config) {
     const hastoken = localStorage.getItem('token')
-    // config.headers['token'] = hastoken
+    // 请求头添加token
+    config.headers['token'] = hastoken
     return config
   },
   function (error) {
