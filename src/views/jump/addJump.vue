@@ -71,14 +71,14 @@
           </div>
         </el-upload>
       </el-form-item>
-      <el-form-item label="网站描述:" prop="description">
+      <el-form-item label="网站描述:">
         <el-input size="large" v-model="ruleForm.description" type="textarea" :rows="3" placeholder="网站描述，最长200字" maxlength="200" />
       </el-form-item>
       <div class="subBox address">
         <el-form-item>
           <el-button size="large" @click="goBack(ruleFormRef)"> 取消 </el-button>
           <el-button size="large" type="primary" @click="submitForm(ruleFormRef, null)"> 保存 </el-button>
-          <el-button size="large" v-if="actionType == 'add'" type="primary" class="continue" @click="submitForm(ruleFormRef, 'goAnd')"> 保存并继续添加菜品 </el-button>
+          <el-button size="large" v-if="actionType == 'add'" type="primary" class="continue" @click="submitForm(ruleFormRef, 'goAnd')"> 保存并继续添加 </el-button>
         </el-form-item>
       </div>
     </el-form>
@@ -212,7 +212,6 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
         // value: JSON.stringify(obj.value)
         name: obj.name
       }))
-      console.log(`output->dis`, params.flavors)
       delete params.dishFlavors
       if (actionType.value == 'add') {
         delete params.id
@@ -226,15 +225,7 @@ const submitForm = async (formEl: FormInstance | undefined, type: any) => {
             dishFlavors.value = []
             // this.dishFlavorsData = []
             imageUrl.value = ''
-            ruleForm = {
-              name: '',
-              id: '',
-              url: '',
-              image: '',
-              description: '',
-              dishFlavors: [],
-              categoryId: ''
-            }
+            // goBaruleFormRef.value)
           }
         } else {
           ElMessage.error(res.msg || '操作失败')
