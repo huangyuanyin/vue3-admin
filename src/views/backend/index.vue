@@ -48,7 +48,7 @@
       ></el-pagination>
       <div class="titleWrap" v-if="showDetail">
         <el-button type="text" class="blueBug" size="large" @click="goback()"> 返回 </el-button>
-        <p style="margin-left: 30px">当前子公司：{{ 11 }}</p>
+        <p style="margin-left: 30px">当前子公司：{{ queryName }}</p>
       </div>
       <div class="tableBar" style="display: flex; justify-content: space-between; padding-right: 35px" v-if="showDetail">
         <el-button type="primary" size="large" @click="addClass('meal')"> + 新增项目部 </el-button>

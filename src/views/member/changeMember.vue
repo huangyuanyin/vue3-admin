@@ -5,6 +5,9 @@
         <el-form-item label="账号:" prop="username">
           <el-input size="large" v-model="ruleForm.username" placeholder="请输入账号" maxlength="20" />
         </el-form-item>
+        <el-form-item label="密码:" prop="password">
+          <el-input size="large" v-model="ruleForm.password" placeholder="请输入密码" maxlength="20" />
+        </el-form-item>
         <el-form-item label="负责人姓名:" prop="name">
           <el-input size="large" v-model="ruleForm.name" placeholder="请输入负责人姓名" maxlength="20" />
         </el-form-item>
@@ -46,6 +49,7 @@ const router = useRouter()
 const actionType = ref()
 let ruleForm = reactive({
   username: '',
+  password: '',
   name: '',
   phone: '',
   companyName: '',
@@ -68,6 +72,7 @@ var validateMobilePhone = (rule: any, value: string, callback) => {
 }
 const rules = reactive<FormRules>({
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   name: [{ required: true, message: '请输入负责人姓名', trigger: 'blur' }],
   phone: [{ required: true, validator: validateMobilePhone, trigger: 'blur' }],
   sex: [{ required: true, message: '请选择权限', trigger: 'change' }],
@@ -109,6 +114,7 @@ const queryEmployeeById = async (id: string | LocationQueryValue[]) => {
   if (String(res.code) === '1') {
     console.log(res.data)
     ruleForm.username = res.data.username
+    ruleForm.password = res.data.password
     ruleForm.name = res.data.name
     ruleForm.phone = res.data.phone
     ruleForm.companyName = res.data.companyName

@@ -4,6 +4,7 @@ import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
 import { loginApi } from '../../api/user.js'
 import { useRouter } from 'vue-router'
+import jwt_decode from 'jwt-decode'
 
 const router = useRouter()
 const loading = ref(false)
@@ -30,8 +31,8 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
       let res = await loginApi(loginForm)
       if (res.code === 1) {
         router.push('/member')
-        localStorage.setItem('token', '111')
-        localStorage.setItem('userInfo', JSON.stringify(res.data))
+        localStorage.setItem('token', res.data)
+        localStorage.setItem('userInfo', JSON.stringify(jwt_decode(res.data)))
       } else {
         ElMessage.error(res.msg)
       }
@@ -47,7 +48,8 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
       <div class="login-form">
         <el-form ref="ruleFormRef" :model="loginForm" :rules="rules">
           <div class="login-form-title">
-            <img src="@/assets/images/login/logo.png" style="width: 139px; height: 42px" alt="" />
+            <!-- <img src="@/assets/images/login/logo.png" style="width: 139px; height: 42px" alt="" /> -->
+            后台管理系统
           </div>
           <el-form-item prop="username">
             <el-input v-model="loginForm.username" :suffix-icon="User" type="text" auto-complete="off" placeholder="账号" maxlength="20" />
@@ -71,4 +73,10 @@ const handleLogin = async (formEl: FormInstance | undefined) => {
 @import url(../../styles/common.css);
 @import url(../../styles/login.css);
 @import url(../../styles/icon/iconfont.css);
+
+.login-form-title {
+  color: #000;
+  font-size: 26px;
+  font-weight: 600;
+}
 </style>

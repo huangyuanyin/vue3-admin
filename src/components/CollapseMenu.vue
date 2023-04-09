@@ -2,7 +2,8 @@
   <div class="app-wrapper openSidebar clearfix" style="width: 200px !important">
     <div class="sidebar-container">
       <div class="logo">
-        <img src="@/assets/images/login/login-logo.png" alt="" style="width: 117px; height: 32px" />
+        <!-- <img src="@/assets/images/login/login-logo.png" alt="" style="width: 117px; height: 32px" /> -->
+        后台管理系统
       </div>
       <el-scrollbar wrap-class="scrollbar-wrapper">
         <el-menu :default-active="defAct" :unique-opened="false" :collapse-transition="false" background-color="#545c64" text-color="#bfcbd9" active-text-color="#f4f4f5">
@@ -115,7 +116,11 @@ onMounted(() => {
 @import url(@/styles/common.css);
 @import url(@/styles/index.css);
 @import url(@/styles/icon/iconfont.css);
-
+.logo {
+  color: #fff;
+  font-size: 21px;
+  font-weight: 700;
+}
 .app-main {
   height: calc(100% - 64px);
 }
