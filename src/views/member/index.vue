@@ -26,10 +26,10 @@
             <!-- <el-button type="text" size="large" class="delBut non" @click="statusHandle(scope.row)" v-if="user === 'admin'">
               {{ scope.row.status == '1' ? '禁用' : '启用' }}
             </el-button> -->
-            <el-button v-if="scope.row.status == '1' && user === 'admin'" type="text" size="large" class="delBut non" @click="statusHandle(scope.row)">禁用</el-button>
-            <el-button v-else type="text" size="large" class="warnBug non" @click="statusHandle(scope.row)" v-if="user === 'admin'">启用</el-button>
-            <el-button type="text" size="large" class="blueBug non" @click="addMemberHandle(scope.row.id)" :class="{ notAdmin: user !== 'admin' }"> 编辑 </el-button>
-            <el-button type="text" size="large" class="delBut non" @click="handleDelete(scope.row.id)" :class="{ notAdmin: user !== 'admin' }"> 删除 </el-button>
+            <el-button v-if="scope.row.status == '1' && user === '管理员'" type="text" size="large" class="delBut non" @click="statusHandle(scope.row)">禁用</el-button>
+            <el-button v-else type="text" size="large" class="warnBug non" @click="statusHandle(scope.row)" v-if="user === '管理员'">启用</el-button>
+            <el-button type="text" size="large" class="blueBug non" @click="addMemberHandle(scope.row.id)" :class="{ notAdmin: user !== '管理员' }"> 编辑 </el-button>
+            <el-button type="text" size="large" class="delBut non" @click="handleDelete(scope.row.id)" :class="{ notAdmin: user !== '管理员' }"> 删除 </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -55,7 +55,7 @@ import { getMemberListApi, enableOrDisableEmployee, deleteEmployee } from '@/api
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const router = useRouter()
-const user = ref(JSON.parse(localStorage.getItem('userInfo')).username) || ''
+const user = ref(JSON.parse(localStorage.getItem('userInfo')).sub) || ''
 const input = ref('')
 const tableData = ref([])
 const loading = ref(false)
