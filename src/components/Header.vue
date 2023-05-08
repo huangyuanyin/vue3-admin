@@ -61,6 +61,18 @@ watch(
           headTitle.value = '添加跳转'
         }
         break
+      case '/notice':
+        headTitle.value = '公告管理'
+        break
+      case '/addNotice':
+        if (route.query.type === 'edit') {
+          headTitle.value = '修改公告'
+        } else if (route.query.type === 'add') {
+          headTitle.value = '添加公告'
+        } else {
+          headTitle.value = '公告详情'
+        }
+        break
       // case '/backend/food':
       //   goBackFlag.value = true
       //   break

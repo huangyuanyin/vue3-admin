@@ -37,6 +37,16 @@ const routes = [
     path: '/addJump',
     name: 'AddJump',
     component: () => import('@/views/jump/addJump.vue')
+  },
+  {
+    path: '/notice',
+    name: 'Notice',
+    component: () => import('@/views/notice/index.vue')
+  },
+  {
+    path: '/addNotice',
+    name: 'AddNotice',
+    component: () => import('@/views/notice/addNotice.vue')
   }
   // {
   //   path: '/:pathMatch(.*)*',

@@ -54,6 +54,12 @@ const menuList = ref([
     name: '跳转管理',
     url: '/jump',
     icon: 'icon-food'
+  },
+  {
+    id: '5',
+    name: '公告管理',
+    url: '/notice',
+    icon: 'icon-order'
   }
 ])
 
@@ -72,6 +78,9 @@ watchEffect(() => {
       defAct.value = '4'
     case '/addJump':
       defAct.value = '4'
+      break
+    case '/notice':
+      defAct.value = '5'
       break
     default:
       break
@@ -105,6 +114,9 @@ onMounted(() => {
       break
     case '/addJump':
       defAct.value = '4'
+      break
+    case '/notice':
+      defAct.value = '5'
       break
     default:
       break
