@@ -159,3 +159,49 @@ export const editCategory = (params) => {
     data: { ...params }
   })
 }
+
+export const uploadMdImageApi = (params) => {
+  return request({
+    url: '/common/upload',
+    method: 'post',
+    data: params
+  })
+}
+
+export const getNoticeListApi = (params) => {
+  return request({
+    url: '/notice/page',
+    method: 'get',
+    params
+  })
+}
+
+export const getNoticeDetailApi = (params) => {
+  return request({
+    url: `/notice/${params}`,
+    method: 'get'
+  })
+}
+
+export const addNoticeListApi = (params) => {
+  return request({
+    url: '/notice',
+    method: 'post',
+    data: params
+  })
+}
+
+export const editNoticeListApi = (params) => {
+  return request({
+    url: '/notice',
+    method: 'put',
+    data: params
+  })
+}
+export const deleteNoticeListApi = (id) => {
+  return request({
+    url: `/notice/`,
+    method: 'delete',
+    params: { id }
+  })
+}

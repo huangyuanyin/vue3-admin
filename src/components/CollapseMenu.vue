@@ -82,6 +82,9 @@ watchEffect(() => {
     case '/notice':
       defAct.value = '5'
       break
+    case '/addNotice':
+      defAct.value = '5'
+      break
     default:
       break
   }

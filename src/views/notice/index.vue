@@ -5,7 +5,7 @@
         <el-button type="primary" size="large" class="continue" @click="addClass('add')"> + 新增公告 </el-button>
       </div>
       <el-table :data="tableData" stripe class="tableBox" border v-if="!showDetail">
-        <el-table-column prop="name" label="公告标题"></el-table-column>
+        <el-table-column prop="title" label="公告标题"></el-table-column>
         <el-table-column prop="updateTime" label="更新时间">
           <template #default="scope">
             {{ scope.row.updateTime }}
@@ -96,7 +96,7 @@
 <script lang="ts" setup>
 import { onMounted, ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { editCategory, getCategoryPage, addCategoryApi, deleCategory } from '@/api/user'
+import { editCategory, getNoticeListApi, addCategoryApi, deleteNoticeListApi } from '@/api/user'
 import { ElMessage, FormInstance, FormRules, ElMessageBox } from 'element-plus'
 import type { TabsPaneContext } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
@@ -168,13 +168,13 @@ const deleteHandle = (ids: any) => {
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
-    let res = await deleCategory(ids)
+    let res = await deleteNoticeListApi(ids)
     if (res.code === 1) {
       ElMessage.success('删除成功！')
       page.value = 1
       init()
     } else {
-      ElMessage.error(res.msg || '操作失败')
+      ElMessage.error(res.msg || '删除失败')
     }
   })
 }
@@ -259,7 +259,7 @@ const handleQuery = () => {
 }
 
 const init = async () => {
-  let res = await getCategoryPage({ page: page.value, pageSize: pageSize.value, type: activeName.value, name: queryName.value })
+  let res = await getNoticeListApi({ page: page.value, pageSize: pageSize.value })
   if (String(res.code) === '1') {
     tableData.value = res.data.records
     counts.value = Number(res.data.total)
