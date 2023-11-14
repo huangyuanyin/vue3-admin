@@ -4,6 +4,12 @@
       <el-form-item label="公告标题:" prop="title">
         <el-input size="large" :disabled="disabled" v-model="ruleForm.title" placeholder="请填写公告标题" maxlength="100" />
       </el-form-item>
+      <el-form-item label="附件上传:">
+        <el-upload v-model:file-list="fileList" class="upload-demo2" action="http://101.43.127.118:8080/notice/upload" :limit="1" :on-exceed="handleExceed">
+          <el-button type="primary">点击上传</el-button>
+        </el-upload>
+        <span style="margin-left: 12px; line-height: 32px">{{ ruleForm.file }}</span>
+      </el-form-item>
       <el-form-item label="公告内容:" prop="notice">
         <Markdown v-if="!disabled" style="z-index: 99999" :data="md" @input="getMd" @fullScreen="fullScreen"></Markdown>
         <MarkdownPreview v-else :data="ruleForm.notice" @fullScreen="fullScreen" />
@@ -52,6 +58,11 @@ const rules = reactive<FormRules>({
   notice: [{ required: true, message: '请输入公告内容', trigger: 'blur' }]
 })
 const disabled = ref(false)
+const fileList = ref([])
+
+const handleExceed = () => {
+  ElMessage.warning('一个公告只能上传一个附件')
+}
 
 const getMd = (val: any) => {
   md.value = val
@@ -68,6 +79,7 @@ const goBack = (formEl: FormInstance | undefined) => {
 
 const submitForm = async (formEl: FormInstance | undefined, type: any) => {
   ruleForm.notice = md.value
+  ruleForm.file = fileList.value[0].name
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
@@ -99,6 +111,7 @@ const init = async () => {
   if (res.code == 1) {
     ruleForm.title = res.data.title
     md.value = ruleForm.notice = res.data.notice
+    ruleForm.file = res.data.file
   } else {
     ElMessage.error(res.msg || '请求失败')
   }
@@ -114,7 +127,7 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="css" scoped>
 @import url(../../styles/common.css);
 @import url(../../styles/index.css);
 @import url(../../styles/icon/iconfont.css);
@@ -202,6 +215,12 @@ onMounted(() => {
   font-size: 14px;
 }
 
+.upload-demo2 {
+  .el-button {
+    display: flex;
+    align-items: center;
+  }
+}
 #food-add-app .uploadImg .el-form-item__label::before {
   content: '*';
   color: #f56c6c;

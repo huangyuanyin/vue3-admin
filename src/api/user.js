@@ -198,10 +198,19 @@ export const editNoticeListApi = (params) => {
     data: params
   })
 }
+
 export const deleteNoticeListApi = (id) => {
   return request({
     url: `/notice/`,
     method: 'delete',
     params: { id }
+  })
+}
+
+export const uploadNoticeApi = (data) => {
+  return request({
+    url: `/notice/upload`,
+    method: 'post',
+    data
   })
 }
