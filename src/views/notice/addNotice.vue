@@ -5,15 +5,15 @@
         <el-input size="large" :disabled="disabled" v-model="ruleForm.title" placeholder="请填写公告标题" maxlength="100" />
       </el-form-item>
       <el-form-item label="附件上传:">
-        <el-upload v-model:file-list="fileList" class="upload-demo2" action="http://101.43.127.118:8080/notice/upload" :limit="1" :on-exceed="handleExceed">
+        <el-upload v-model:file-list="fileList" class="upload-demo2" action="http://101.43.127.118:8080/notice/upload" :limit="1" :on-exceed="handleExceed" :show-file-list="false">
           <el-button type="primary">点击上传</el-button>
         </el-upload>
         <span style="margin-left: 12px; line-height: 32px">{{ ruleForm.file }}</span>
       </el-form-item>
       <el-form-item label="公告内容:" prop="notice">
-        <Markdown v-if="!disabled" style="z-index: 99999" :data="md" @input="getMd" @fullScreen="fullScreen"></Markdown>
+        <!-- <Markdown v-if="!disabled" style="z-index: 99999" :data="md" @input="getMd" @fullScreen="fullScreen"></Markdown> -->
+        <TinymceCom v-if="!disabled" v-model="md" height="700px" />
         <MarkdownPreview v-else :data="ruleForm.notice" @fullScreen="fullScreen" />
-        <!-- <TinymceCom v-model="tinyValue" placeholder="请输入帖子详情内容(不少于10个字)" /> -->
       </el-form-item>
       <div class="subBox address">
         <el-form-item v-if="!disabled">
@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch, nextTick } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { getCategoryListApi, addNoticeListApi, getNoticeDetailApi, editNoticeListApi } from '@/api/user'
@@ -50,7 +50,8 @@ const imageUrl = ref('')
 let ruleForm = reactive({
   id: '',
   title: '',
-  notice: ''
+  notice: '',
+  file: ''
 })
 const ruleFormRef = ref<FormInstance>()
 const rules = reactive<FormRules>({
@@ -59,6 +60,15 @@ const rules = reactive<FormRules>({
 })
 const disabled = ref(false)
 const fileList = ref([])
+
+watch(
+  () => fileList.value,
+  () => {
+    if (fileList.value.length) {
+      ruleForm.file = fileList.value[0].name
+    }
+  }
+)
 
 const handleExceed = () => {
   ElMessage.warning('一个公告只能上传一个附件')
@@ -79,7 +89,11 @@ const goBack = (formEl: FormInstance | undefined) => {
 
 const submitForm = async (formEl: FormInstance | undefined, type: any) => {
   ruleForm.notice = md.value
-  ruleForm.file = fileList.value[0].name
+  if (route.query.type === 'add' && fileList.value.length > 0) {
+    ruleForm.file = fileList.value[0].name
+  } else if (route.query.type === 'edit' && fileList.value.length > 0) {
+    ruleForm.file = fileList.value[0].name
+  }
   if (!formEl) return
   await formEl.validate(async (valid, fields) => {
     if (valid) {
@@ -110,6 +124,9 @@ const init = async () => {
   let res = await getNoticeDetailApi(route.query.id)
   if (res.code == 1) {
     ruleForm.title = res.data.title
+    nextTick(() => {
+      md.value = res.data.notice
+    })
     md.value = ruleForm.notice = res.data.notice
     ruleForm.file = res.data.file
   } else {

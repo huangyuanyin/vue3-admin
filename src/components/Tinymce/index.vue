@@ -1,142 +1,140 @@
-<template>
-  <div class="my-tinymce">
-    <Editor v-model="contentValue" :init="myInit" />
-  </div>
-</template>
+<script setup>
+import Editor from '@tinymce/tinymce-vue'
+import { defineProps, defineEmits, toRefs, ref, watch, onMounted } from 'vue'
 
-<script>
-import { onMounted, reactive, toRefs, watch } from 'vue'
-import axios from 'axios'
-import Editor from '@tinymce/tinymce-vue' // 引入tinymce编辑器
-import tinymce from 'tinymce/tinymce' // tinymce默认hidden，不引入则不显示编辑器
-import './js/importTinymce' // 导入配置文件
-import { init } from './js/config'
-import { useRoute } from 'vue-router'
-export default {
-  name: 'myEditor',
-  components: {
-    Editor
+const emit = defineEmits(['update:modelValue'])
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: ''
   },
-  props: {
-    // 绑定文本值
-    modelValue: {
-      type: String,
-      default: ''
-    },
-    // placeholder
-    placeholder: {
-      type: String,
-      default: '请输入内容'
-    },
-    // 默认样式
-    style: {
-      type: Object,
-      default: () => {
-        return { width: '100%', heigth: '70vh' }
-      }
-    },
-    // 图片上传服务器地址
-    imgUploadUrl: {
-      type: String,
-      default: ''
-    }
+  readonly: {
+    type: Boolean,
+    default: false
   },
-  setup(props, { emit }) {
-    const route = useRoute()
-    const state = reactive({
-      myInit: customer(init), // 初始化
-      contentValue: props.modelValue, // 绑定文本
-      timeout: null
-    })
-    onMounted(() => {
-      tinymce.init({})
-    })
-    // 侦听文本变化并传给外界
-    watch(
-      () => state.contentValue,
-      (n) => {
-        debounce(() => {
-          emit('update:modelValue', state.contentValue)
-        })
-      }
-    )
-    // 侦听默认值 外界第一次传进来一个 v-model 就赋值给 contentValue
-    watch(
-      () => props.modelValue,
-      (n) => {
-        if (n && n !== state.contentValue) {
-          state.contentValue = n
-        }
-      }
-    )
-    watch(
-      () => route.query,
-      () => {
-        if (route.query && route.query.isAdd) {
-          state.contentValue = ''
-        }
-      }
-    )
-
-    function debounce(fn, wait = 400) {
-      // console.log('进到了防抖', wait)
-      if (state.timeout !== null) {
-        clearTimeout(state.timeout)
-      }
-      state.timeout = setTimeout(fn, wait)
-    }
-    // 参数自定义初始化
-    function customer(init) {
-      // 允许外界传进来高度和placeholder
-      init.height = props.style.heigth
-      init.placeholder = props.placeholder
-      // 粘贴图片 自动处理 base64
-      init.urlconverter_callback = (url, node, onSave, name) => {
-        if (node === 'img' && url.startsWith('blob:')) {
-          tinymce.activeEditor && tinymce.activeEditor.uploadImages()
-        }
-        return url
-      }
-      // 图片上传
-      // init.images_upload_handler = (blobInfo, success, failure) => {
-      //   imgUploadFn(blobInfo, success, failure)
-      // }
-      return init
-    }
-    function imgUploadFn(blobInfo, success, failure) {
-      // 可以限制图片大小
-      // if (blobInfo.blob().size / 1024 / 1024 > 2) {
-      //   failure('上传失败，图片大小请控制在 2M 以内')
-      // } else {}
-      const params = new FormData()
-      params.append('file', blobInfo.blob())
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
-      // 图片上传
-      axios
-        .post(props.imgUploadUrl, params, config)
-        .then((res) => {
-          if (res.data.code == 0) {
-            success(res.data.data.url) // 上传成功，在成功函数里填入图片路径
-            // console.log('[文件上传]', res.data)
-          } else {
-            failure('上传失败')
-          }
-        })
-        .catch(() => {
-          failure('上传出错，服务器开小差了呢')
-        })
-    }
-    return {
-      ...toRefs(state),
-      customer,
-      debounce
-    }
+  bodyStyle: {
+    type: String,
+    default: 'body { margin: 3rem 20% 3rem 6% }'
+  },
+  plugins: {
+    type: [String, Array],
+    default:
+      ' quickbars        help autosave  lists advlist code charmap link fullscreen emoticons wordcount image codesample   directionality autosave  visualblocks autolink  anchor    importcss insertdatetime media pagebreak  preview searchreplace table '
+  },
+  toolbar: {
+    type: [String, Array],
+    default: [
+      '    undo redo removeformat  blocks fontsize bold italic strikethrough underline superscript subscript  forecolor backcolor align bullist numlist  lineheight  link blockquote hr searchreplace anchor help  tableofcontentsupdate  charmap emoticons wordcount  code  codesample toc image fullscreen   preview autolink  autosave'
+    ]
   }
-}
+})
+
+const { modelValue } = toRefs(props)
+const editorValue = ref(props.modelValue)
+const key = '3wvx4jkjmreyeiqypzs5hnwrkncklep4xi69inkwgfoipxj7'
+const initOptions = ref({
+  // skin: 'jam', //果酱图标
+  // icons: 'jam', //果酱图标
+  placeholder: '直接输入正文...',
+  // language: 'zh-Hans',
+  height: '800px',
+  plugins: props.plugins, // 插件
+  toolbar: props.readonly ? false : props.toolbar, // 工具栏
+  toolbar_mode: 'sliding', // 工具栏模式
+  autosave_ask_before_unload: false,
+  autosave_interval: '2s', // 编辑器在拍摄当前内容的快照和将其保存到本地存储之间应等待的时间。默认为“ 30s”
+  autosave_prefix: 'tinymce-autosave', // 用于保存的键的前缀
+  block_formats: '正文=p; 标题1=h1; 标题2=h2; 标题3=h3; 标题4=h4; 标题5=h5; 标题6=h6', // 设置块格式,
+  line_height_formats: '1 1.2 1.4 1.6 2 2.5 3', // 设置行高格式
+  readonly: props.readonly, // 设置只读
+  statusbar: true, // 是否隐藏状态栏
+  menubar: false, // 是否隐藏菜单栏
+  branding: false, // 是否隐藏品牌
+  resize: props.resize, // 是否允许调整大小
+  help_accessibility: true, // 是否在 TinyMCE 状态栏中显示用于访问“帮助”对话框的键盘快捷键。
+  a11y_advanced_options: true, // 是否在“插入链接”对话框中显示高级选项
+  content_style: props.bodyStyle,
+  file_picker_callback: (cb) => {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'file')
+    input.setAttribute('accept', 'image/*')
+    input.addEventListener('change', (e) => {
+      const file = e.target.files[0]
+      const reader = new FileReader()
+      reader.addEventListener('load', () => {
+        const id = 'blobid' + new Date().getTime()
+        const blobCache = tinymce.activeEditor.editorUpload.blobCache
+        const base64 = reader.result.split(',')[1]
+        const blobInfo = blobCache.create(id, file, base64)
+        blobCache.add(blobInfo)
+        cb(blobInfo.blobUri(), { title: file.name })
+      })
+      reader.readAsDataURL(file)
+    })
+    input.click()
+  },
+  help_tabs: [
+    'shortcuts',
+    'keyboardnav'
+    //  'plugins', 'versions'
+  ], // 设置帮助选项卡
+  image_advtab: true, // 是否显示高级选项卡
+  image_dimensions: true, // 是否显示图像尺寸
+  image_description: true, // 是否显示图像描述
+  image_caption: true, // 是否显示图像标题
+  image_title: true, // 是否显示图像标题
+  image_class_list: [
+    { title: '无', value: '' },
+    { title: '居中', value: 'img-center' },
+    { title: '左浮动', value: 'img-left' },
+    { title: '右浮动', value: 'img-right' }
+  ], // 设置图像类列表
+  file_picker_types: 'image', // 设置文件选择器类型
+  quickbars_image_toolbar: 'alignleft aligncenter alignright | rotateleft rotateright | imageoptions', // 快速图像工具栏
+  quickbars_selection_toolbar: 'bold italic underline quicklink h2 h3 blockquote quickimage quicktable', // 快速工具栏
+  quickbars_insert_toolbar: 'p h2 h3 bullist numlist quickimage quicktable hr', // 快速插入工具栏
+  setup: (editor) => {
+    editor.on('init', () => {
+      //
+    })
+    // editor.ui.registry.addContextToolbar('paragraphlink', {
+    //   predicate: (node) => {
+    //     return node.nodeName.toLowerCase() === 'p'
+    //   },
+    //   items: 'quicklink bold',
+    //   position: 'node'
+    // })
+  }
+})
+
+watch(
+  () => editorValue.value,
+  (newVal) => {
+    emit('update:modelValue', newVal)
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  setTimeout(() => {
+    editorValue.value = props.modelValue
+  }, 1000)
+})
 </script>
 
-<style></style>
+<template>
+  <main id="sample">
+    <Editor :disabled="props.readonly" v-model="editorValue" :api-key="key" :init="initOptions"></Editor>
+  </main>
+</template>
+
+<style scoped>
+@media (min-width: 1024px) {
+  #sample {
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    width: 100%;
+  }
+}
+</style>
