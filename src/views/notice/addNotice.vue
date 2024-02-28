@@ -5,7 +5,16 @@
         <el-input size="large" :disabled="disabled" v-model="ruleForm.title" placeholder="请填写公告标题" maxlength="100" />
       </el-form-item>
       <el-form-item label="附件上传:">
-        <el-upload v-model:file-list="fileList" class="upload-demo2" action="http://101.43.127.118:8080/notice/upload" :limit="1" :on-exceed="handleExceed" :show-file-list="false">
+        <el-upload
+          v-model:file-list="fileList"
+          :on-change="toUpload"
+          class="upload-demo2"
+          :auto-upload="false"
+          action=""
+          :limit="1"
+          :on-exceed="handleExceed"
+          :show-file-list="false"
+        >
           <el-button type="primary">点击上传</el-button>
         </el-upload>
         <span style="margin-left: 12px; line-height: 32px">{{ ruleForm.file }}</span>
@@ -32,7 +41,7 @@
 import { ref, reactive, onMounted, watch, nextTick } from 'vue'
 import { ElMessage, FormInstance, FormRules } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
-import { getCategoryListApi, addNoticeListApi, getNoticeDetailApi, editNoticeListApi } from '@/api/user'
+import { getCategoryListApi, addNoticeListApi, getNoticeDetailApi, editNoticeListApi, uploadNoticeApi } from '@/api/user'
 import { useRoute, useRouter } from 'vue-router'
 import TinymceCom from '@/components/Tinymce/index.vue'
 import Markdown from '@/components/Markdown/index.vue'
@@ -51,7 +60,8 @@ let ruleForm = reactive({
   id: '',
   title: '',
   notice: '',
-  file: ''
+  file: '',
+  fileName: ''
 })
 const ruleFormRef = ref<FormInstance>()
 const rules = reactive<FormRules>({
@@ -69,6 +79,18 @@ watch(
     }
   }
 )
+
+const toUpload = async (uploadFile: any, uploadFiles: any) => {
+  const formData = new FormData()
+  formData.append('file', uploadFile.raw)
+  let res = await uploadNoticeApi(formData)
+  if (res.code === 1) {
+    ElMessage.success('上传成功')
+    ruleForm.fileName = res.data
+  } else {
+    ElMessage.error(res.msg)
+  }
+}
 
 const handleExceed = () => {
   ElMessage.warning('一个公告只能上传一个附件')
@@ -129,6 +151,7 @@ const init = async () => {
     })
     md.value = ruleForm.notice = res.data.notice
     ruleForm.file = res.data.file
+    ruleForm.fileName = res.data.fileName
   } else {
     ElMessage.error(res.msg || '请求失败')
   }
