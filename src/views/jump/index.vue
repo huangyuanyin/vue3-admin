@@ -38,7 +38,7 @@
             <el-image
               style="width: auto; height: 40px; border: none; cursor: pointer"
               :src="getImage(scope.row.image)"
-              :preview-src-list="[`http://101.43.127.118:8080/common/download?name=${scope.row.image}`]"
+              :preview-src-list="[`http://81.70.224.230:8080/common/download?name=${scope.row.image}`]"
               fit="contain"
               preview-teleported
             >
@@ -111,7 +111,7 @@ const handleSelectionChange = (val: User[]) => {
 }
 
 const getImage = (image: any) => {
-  return `http://101.43.127.118:8080/common/download?name=${image}`
+  return `http://81.70.224.230:8080/common/download?name=${image}`
 }
 
 const handleQuery = () => {

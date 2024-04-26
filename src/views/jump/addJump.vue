@@ -66,7 +66,7 @@
         <el-upload
           class="upload-demo"
           drag
-          action="http://101.43.127.118:8080/common/upload"
+          action="http://81.70.224.230:8080/common/upload"
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
           :on-change="onChange"
@@ -162,7 +162,7 @@ const handleAvatarSuccess = (response: { code: number; msg: string; data: any },
   if (response.code === 0 && response.msg === '未登录') {
     window.top.location.href = '/backend/page/login/login.html'
   } else {
-    imageUrl.value = `http://101.43.127.118:8080/common/download?name=${response.data}`
+    imageUrl.value = `http://81.70.224.230:8080/common/download?name=${response.data}`
     ruleForm.image = response.data
     console.log(`output->ruleForm.image`, ruleForm.image)
   }
@@ -293,7 +293,7 @@ const init = async () => {
     console.log('this.dishFlavors', dishFlavors.value)
     // this.ruleForm.id = res.data.data.categoryId
     // this.imageUrl = res.data.data.image
-    imageUrl.value = `http://101.43.127.118:8080/common/download?name=${res.data.image}`
+    imageUrl.value = `http://81.70.224.230:8080/common/download?name=${res.data.image}`
   } else {
     ElMessage.error(res.msg || '操作失败')
   }

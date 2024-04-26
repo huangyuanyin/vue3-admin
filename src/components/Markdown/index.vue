@@ -90,7 +90,7 @@ const imgAdd = async (name, $file) => {
   let res = await uploadMdImageApi(formdata)
   if (res.code === 1) {
     // 第二步.将返回的url替换到文本原位置![...](0) -> ![...](url)
-    mavonEditorRef.value.$img2Url(name, 'http://101.43.127.118:8080/common/download?name=' + res.data)
+    mavonEditorRef.value.$img2Url(name, 'http://81.70.224.230:8080/common/download?name=' + res.data)
   }
 }
 </script>
